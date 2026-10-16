@@ -156,12 +156,38 @@ textarea.big{min-height:150px;font-family:ui-monospace,Menlo,Consolas,monospace;
 .foot .brand .slot.empty{display:none}
 
 .canvas>.mark{position:absolute;z-index:3;color:rgba(255,255,255,.22);font-weight:700;font-size:16px;letter-spacing:.2em}
+
+.tabs{display:flex;gap:6px;margin:0 0 14px}
+.tab{flex:1;background:#1A0F12;border:1px solid #2A1A1D;border-radius:8px;color:#8C7276;
+  font:700 11px 'Montserrat',sans-serif;letter-spacing:.14em;text-transform:uppercase;
+  padding:9px 6px;cursor:pointer}
+.tab:hover{color:#E6D6D8}
+.tab.on{background:#241418;border-color:#FF2F37;color:#fff}
+.tlist{max-height:430px;overflow:auto;border:1px solid #2A1A1D;border-radius:8px;margin-top:10px}
+.trow{display:flex;align-items:center;gap:10px;padding:7px 9px;border-bottom:1px solid #201316}
+.trow:last-child{border-bottom:0}
+.trow .lg{width:30px;height:30px;flex:0 0 30px;background-repeat:no-repeat;background-position:center;background-size:contain}
+.trow .tn{flex:1;min-width:0}
+.trow .tn b{display:block;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .tn span{display:block;font-size:10px;color:#8C7276;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .own{flex:0 0 auto;font-size:9px;letter-spacing:.14em;color:#FF8086;border:1px solid #5A2A2F;border-radius:4px;padding:2px 5px}
+.trow button{background:none;border:0;cursor:pointer;color:#8C7276;font:700 12px 'Montserrat',sans-serif;padding:4px 5px}
+.trow button:hover{color:#F0E6E8}
+.trow button.del:hover{color:#FF2F37}
+.prev{width:56px;height:56px;flex:0 0 56px;border:1px dashed #3B2328;border-radius:8px;
+  background-repeat:no-repeat;background-position:center;background-size:contain;background-color:#0B0607}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div class="panel">
+    <div class="tabs">
+      <button class="tab on" data-t="card" type="button">Карточка</button>
+      <button class="tab" data-t="db" type="button">База команд</button>
+    </div>
+
+    <div id="paneCard">
     <h2>Статистика матча — BetBoom Team</h2>
     <p class="sub">Вставь табло целиком — счёт, раунд, карта и оба состава подтянутся сами. База из 67 команд с логотипами зашита в файл.</p>
 
@@ -170,6 +196,12 @@ textarea.big{min-height:150px;font-family:ui-monospace,Menlo,Consolas,monospace;
       <textarea id="dump" class="big" placeholder="Скопируй табло целиком со счётом, раундом, картой и обоими составами и вставь сюда."></textarea>
       <div class="btns"><button class="btn acc wide" id="bDump">Разобрать табло</button></div>
       <div class="msg" id="msg2"></div>
+    </div>
+
+    <div class="grp">
+      <h3>Турнир</h3>
+      <input id="iEvent" placeholder="PGL Cluj-Napoca 2026">
+      <p class="sub" style="margin:6px 0 0">Запоминается между запусками — вставка табло его не трогает.</p>
     </div>
 
     <div class="grp">
@@ -201,7 +233,6 @@ textarea.big{min-height:150px;font-family:ui-monospace,Menlo,Consolas,monospace;
       <summary>Ручная правка</summary>
       <div class="inner">
         <div class="row">
-          <div class="f3"><label>Турнир</label><input id="iEvent"></div>
           <div class="f1"><label>Раунд</label><input id="iRound"></div>
         </div>
         <div class="row">
@@ -236,6 +267,48 @@ textarea.big{min-height:150px;font-family:ui-monospace,Menlo,Consolas,monospace;
       <h3>Готово</h3>
       <div class="btns"><button class="btn acc wide" id="bPng">Скачать PNG 1080×1080</button></div>
       <div class="msg" id="msg"></div>
+    </div>
+    </div>
+
+    <div id="paneDb" hidden>
+      <h2>База команд</h2>
+      <p class="sub">Свои команды хранятся в браузере и перекрывают встроенные при совпадении названия. Выгрузи JSON, чтобы не потерять их при переустановке или на другом компьютере.</p>
+
+      <div class="grp">
+        <h3 id="formTitle">Добавить команду</h3>
+        <div class="row">
+          <div class="f2"><label>Название</label><input id="tName" placeholder="Aurora"></div>
+          <div class="f1"><label>Код</label><input id="tShort" placeholder="AUR"></div>
+        </div>
+        <div class="row">
+          <div class="f1"><label>Другие написания через запятую</label><input id="tAlias" placeholder="Aurora Gaming"></div>
+        </div>
+        <div class="row" style="align-items:flex-end">
+          <div class="f1">
+            <label>Логотип — PNG с прозрачным фоном</label>
+            <div class="btns" style="margin:0">
+              <label class="btn" style="margin:0">Выбрать файл<input type="file" id="tFile" accept="image/*" style="display:none"></label>
+              <button class="btn" id="tClear" type="button">Убрать</button>
+            </div>
+          </div>
+          <div class="prev" id="tPrev" title="как ляжет на карточку"></div>
+        </div>
+        <div class="btns">
+          <button class="btn acc" id="tSave" type="button">Сохранить</button>
+          <button class="btn" id="tReset" type="button">Очистить форму</button>
+        </div>
+        <div class="msg" id="msg3"></div>
+      </div>
+
+      <div class="grp">
+        <h3>Все команды — <span id="cnt">0</span></h3>
+        <input id="tSearch" placeholder="поиск по названию">
+        <div class="tlist" id="tList"></div>
+        <div class="btns">
+          <button class="btn" id="tExport" type="button">Выгрузить JSON</button>
+          <label class="btn" style="margin:0">Загрузить JSON<input type="file" id="tImport" accept="application/json,.json" style="display:none"></label>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -421,15 +494,28 @@ const SEED = {"teams":[{"name":"FURIA","short":"FUR","aliases":["FURIA"],"logo":
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-/* ---------- поиск команды в базе ---------- */
+/* ---------- база команд: встроенная плюс своя из браузера ---------- */
 const NORM=s=>String(s).toLowerCase().replace(/[^a-zа-я0-9]/gi,'');
+let USER=[];
+try{ USER=JSON.parse(localStorage.getItem('bb_teams')||'[]')||[]; }catch(_){ USER=[]; }
+function saveUser(){
+  try{ localStorage.setItem('bb_teams',JSON.stringify(USER)); }
+  catch(e){ say3('Браузер не дал сохранить — возможно, кончилось место под логотипы','err'); }
+}
+/* своя запись перекрывает встроенную с тем же названием */
+function allTeams(){
+  const own=new Set(USER.map(t=>NORM(t.name)));
+  return USER.concat(SEED.teams.filter(t=>!own.has(NORM(t.name))));
+}
 function findTeam(q){
   const n=NORM(q); if(!n) return null;
   let best=null;
-  for(const t of SEED.teams){
+  for(const t of allTeams()){
     const keys=[t.name,t.short].concat(t.aliases||[]).filter(Boolean).map(NORM);
     if(keys.includes(n)) return t;
-    if(!best && keys.some(k=>k.startsWith(n)||n.startsWith(k))) best=t;
+    /* по началу строки — только от четырёх знаков, иначе короткий код
+       вроде «B» цепляет любую команду на эту букву */
+    if(!best && n.length>=4 && keys.some(k=>k.length>=4&&(k.startsWith(n)||n.startsWith(k)))) best=t;
   }
   return best;
 }
@@ -673,11 +759,162 @@ async function savePng(){
 }
 
 /* ---------- старт ---------- */
+
+/* ---------- вкладка «База команд» ---------- */
+function say3(t,cls){ const m=$('msg3'); if(m){ m.textContent=t||''; m.className='msg'+(cls?' '+cls:''); } }
+
+let editing=null;   /* нормализованное имя редактируемой записи */
+let formLogo='';    /* data:URL выбранного файла */
+
+/* ужимаю логотип до 512 px по длинной стороне: в браузерном хранилище мало
+   места, а на карточке он всё равно выводится мельче */
+function shrink(dataUrl){
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>{
+      const m=Math.max(im.naturalWidth,im.naturalHeight);
+      if(m<=512) return res(dataUrl);
+      const k=512/m, c=document.createElement('canvas');
+      c.width=Math.round(im.naturalWidth*k); c.height=Math.round(im.naturalHeight*k);
+      const x=c.getContext('2d'); x.imageSmoothingQuality='high';
+      x.drawImage(im,0,0,c.width,c.height);
+      res(c.toDataURL('image/png'));
+    };
+    im.onerror=()=>res(dataUrl);
+    im.src=dataUrl;
+  });
+}
+
+function refreshDatalist(){
+  const dl=$('teamList'); dl.innerHTML='';
+  allTeams().slice().sort((x,y)=>x.name.localeCompare(y.name)).forEach(t=>{
+    const o=document.createElement('option'); o.value=t.name; dl.appendChild(o);
+  });
+  const c=$('cnt'); if(c) c.textContent=allTeams().length;
+}
+
+function drawList(){
+  const q=NORM($('tSearch').value), host=$('tList'); host.innerHTML='';
+  const own=new Set(USER.map(t=>NORM(t.name)));
+  const rows=allTeams().filter(t=>!q||NORM(t.name).includes(q)||(t.aliases||[]).some(a=>NORM(a).includes(q)))
+                       .sort((x,y)=>x.name.localeCompare(y.name));
+  if(!rows.length){ host.innerHTML='<div class="trow"><div class="tn"><b>ничего не нашлось</b></div></div>'; return; }
+  rows.forEach(t=>{
+    const mine=own.has(NORM(t.name));
+    const d=document.createElement('div'); d.className='trow';
+    d.innerHTML='<div class="lg"></div><div class="tn"><b></b><span></span></div>'+
+      (mine?'<div class="own">своя</div>':'')+
+      '<button class="ed" title="изменить">изм</button>'+
+      (mine?'<button class="del" title="удалить">&times;</button>':'');
+    d.querySelector('b').textContent=t.name;
+    d.querySelector('span').textContent=[t.short].concat(t.aliases||[]).filter(Boolean).join(' · ')||'—';
+    if(t.logo) d.querySelector('.lg').style.backgroundImage='url('+t.logo+')';
+    d.querySelector('.ed').onclick=()=>fillForm(t,mine);
+    const del=d.querySelector('.del');
+    if(del) del.onclick=()=>{
+      if(!confirm('Удалить «'+t.name+'» из своих команд?')) return;
+      USER=USER.filter(u=>NORM(u.name)!==NORM(t.name)); saveUser();
+      if(editing===NORM(t.name)) resetForm();
+      refreshDatalist(); drawList(); render();
+      say3('Удалено: '+t.name,'ok');
+    };
+    host.appendChild(d);
+  });
+}
+
+function fillForm(t,mine){
+  $('tName').value=t.name||''; $('tShort').value=t.short||'';
+  $('tAlias').value=(t.aliases||[]).join(', ');
+  formLogo=t.logo||'';
+  $('tPrev').style.backgroundImage=formLogo?'url('+formLogo+')':'none';
+  editing=NORM(t.name);
+  $('formTitle').textContent=mine?'Изменить команду':'Копия встроенной — сохранится как своя';
+  say3(''); $('tName').scrollIntoView({block:'nearest'});
+}
+function resetForm(){
+  ['tName','tShort','tAlias'].forEach(k=>$(k).value='');
+  formLogo=''; $('tPrev').style.backgroundImage='none'; editing=null;
+  $('formTitle').textContent='Добавить команду'; say3('');
+}
+function saveTeam(){
+  const name=$('tName').value.trim();
+  if(!name){ say3('Без названия не сохраню','err'); return; }
+  const rec={name:name, short:$('tShort').value.trim(),
+             aliases:$('tAlias').value.split(',').map(s=>s.trim()).filter(Boolean),
+             logo:formLogo||''};
+  const key=NORM(name);
+  USER=USER.filter(u=>NORM(u.name)!==key && (!editing||NORM(u.name)!==editing));
+  USER.push(rec); saveUser();
+  refreshDatalist(); drawList(); render();
+  const had=!!formLogo; resetForm();
+  say3('Сохранено: '+name+(had?'':' (без логотипа)'),'ok');
+}
+function exportTeams(){
+  const blob=new Blob([JSON.stringify(USER,null,1)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='bb-teams.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+  say3('Выгружено команд: '+USER.length,'ok');
+}
+function importTeams(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    let data=null;
+    try{ data=JSON.parse(r.result); }catch(e){ say3('Это не JSON','err'); return; }
+    if(!Array.isArray(data)){ say3('Ожидал список команд','err'); return; }
+    let n=0;
+    data.forEach(t=>{
+      if(!t||!t.name) return;
+      const key=NORM(t.name);
+      USER=USER.filter(u=>NORM(u.name)!==key);
+      USER.push({name:String(t.name),short:String(t.short||''),
+                 aliases:Array.isArray(t.aliases)?t.aliases.map(String):[],logo:String(t.logo||'')});
+      n++;
+    });
+    saveUser(); refreshDatalist(); drawList(); render();
+    say3('Загружено команд: '+n,'ok');
+  };
+  r.onerror=()=>say3('Не смог прочитать файл','err');
+  r.readAsText(file);
+}
+
+function hookDb(){
+  document.querySelectorAll('.tab').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===b));
+      const t=b.dataset.t;
+      $('paneCard').hidden=t!=='card';
+      $('paneDb').hidden=t!=='db';
+      if(t==='db') drawList();
+    };
+  });
+  $('tFile').addEventListener('change',e=>{
+    const f=e.target.files&&e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=async()=>{
+      formLogo=await shrink(r.result);
+      $('tPrev').style.backgroundImage='url('+formLogo+')';
+      say3('Логотип подготовлен: '+f.name,'ok');
+    };
+    r.onerror=()=>say3('Не смог прочитать картинку','err');
+    r.readAsDataURL(f);
+    e.target.value='';
+  });
+  $('tClear').onclick=()=>{ formLogo=''; $('tPrev').style.backgroundImage='none'; say3('Логотип убран'); };
+  $('tSave').onclick=saveTeam;
+  $('tReset').onclick=resetForm;
+  $('tSearch').addEventListener('input',drawList);
+  $('tExport').onclick=exportTeams;
+  $('tImport').addEventListener('change',e=>{
+    const f=e.target.files&&e.target.files[0]; if(f) importTeams(f);
+    e.target.value='';
+  });
+}
+
 (function init(){
   SEED.maps.forEach(m=>{ const o=document.createElement('option'); o.value=m; $('mapList').appendChild(o); });
-  SEED.teams.slice().sort((x,y)=>x.name.localeCompare(y.name)).forEach(t=>{
-    const o=document.createElement('option'); o.value=t.name; $('teamList').appendChild(o);
-  });
+  refreshDatalist(); hookDb();
   buildInputs('a'); buildInputs('b');
   hookUpload(1); hookUpload(2);
   /* турнир и подписи меняются редко — подставляю прошлые, матч всегда чистый */
@@ -688,11 +925,11 @@ async function savePng(){
   paintBg(); render(); fit();
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fitAll);
 
-  document.querySelector('.panel').addEventListener('input',e=>{
+  $('paneCard').addEventListener('input',e=>{
     if(e.target.tagName==='TEXTAREA'||e.target.type==='file') return;
     render();
   });
-  document.querySelector('.panel').addEventListener('change',e=>{
+  $('paneCard').addEventListener('change',e=>{
     if(e.target.type==='file') return;
     render();
   });
